@@ -9,8 +9,7 @@
 
 <input type="file"
        id="changeImage" name="changeImage"
-       accept="image/png, image/jpeg" imgid="image" >
-	   
+       accept="image/png, image/jpeg" imgid="image" >   
 <p/>
 	   	   
 <img id="image" src="/image.jpeg" width="500"/>
@@ -58,6 +57,7 @@ let changeImage = function (evt) {
 
 document.getElementById("changeImage").onchange = changeImage;
 document.getElementById("changeStyleImage").onchange = changeImage;
+const model = await loadModel();
 
 async function loadModel() {
 	return tf.loadGraphModel('/style_transfer_tfjs/model.json');
@@ -65,7 +65,6 @@ async function loadModel() {
 
 async function doStyleTransfer() {
 	console.log("doStyleTransfer called");
-	const model = await loadModel();
 	
 	// get image to apply style to
 	const image = document.getElementById("image");
