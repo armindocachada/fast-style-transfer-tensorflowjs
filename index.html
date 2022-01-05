@@ -1,0 +1,95 @@
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.12.0/dist/tf.min.js"></script>
+
+<html>
+
+<body onload="doStyleTransfer()">
+
+<label for="avatar">Choose an image to apply styles to:</label>
+<p/>
+
+<input type="file"
+       id="changeImage" name="changeImage"
+       accept="image/png, image/jpeg" imgid="image" >
+	   
+<p/>
+	   	   
+<img id="image" src="/image.jpeg" width="500"/>
+<p/>
+
+<label for="avatar">Choose the style image:</label>
+<p/>
+
+<input type="file"
+       id="changeStyleImage" name="changeImage"
+       accept="image/png, image/jpeg" imgid="styleImage" >
+	
+<p/>	
+<img id="styleImage" src="/style_transfer_image.jpeg" width="500"/>
+<p/>
+<canvas id="stylizedImage" width="500" height="500"/>
+</body>
+</html>
+
+
+<script>
+
+
+let changeImage = function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+        files = tgt.files;
+
+    // FileReader support
+    if (FileReader && files && files.length) {
+        var fr = new FileReader();
+        fr.onload = function () {
+            document.getElementById(evt.target.getAttribute("imgid")).src = fr.result;
+        }
+        fr.readAsDataURL(files[0]);
+		
+		doStyleTransfer();
+    }
+
+    // Not supported
+    else {
+        // fallback -- perhaps submit the input to an iframe and temporarily store
+        // them on the server until the user's session ends.
+    }
+}
+
+document.getElementById("changeImage").onchange = changeImage;
+document.getElementById("changeStyleImage").onchange = changeImage;
+
+async function loadModel() {
+	return tf.loadGraphModel('/style_transfer_tfjs/model.json');
+}
+
+async function doStyleTransfer() {
+	console.log("doStyleTransfer called");
+	const model = await loadModel();
+	
+	// get image to apply style to
+	const image = document.getElementById("image");
+	const styleImage = document.getElementById("styleImage");
+	
+	console.log("model=" + model);
+	//model.execute();
+	const imageTensor = preprocess(image);
+	const styleImageTensor = preprocess(styleImage);
+	
+    let result = model.execute([styleImageTensor,imageTensor]);
+	let canvas = document.getElementById("stylizedImage");
+	
+	tf.browser.toPixels( tf.squeeze(result), canvas);
+} 
+
+function preprocess(imageData) {
+	let imageTensor = tf.browser.fromPixels(imageData);
+    const offset = tf.scalar(255.0);
+	const normalized = tf.scalar(1.0).sub(imageTensor.div(offset));
+	const batched = normalized.expandDims(0);
+	return batched;
+
+}
+
+
+</script>
