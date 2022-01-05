@@ -54,10 +54,10 @@ let changeImage = function (evt) {
         // them on the server until the user's session ends.
     }
 }
+var fastStyleTransferModel;
 
 document.getElementById("changeImage").onchange = changeImage;
 document.getElementById("changeStyleImage").onchange = changeImage;
-const model = await loadModel();
 
 async function loadModel() {
 	return tf.loadGraphModel('/style_transfer_tfjs/model.json');
@@ -65,17 +65,20 @@ async function loadModel() {
 
 async function doStyleTransfer() {
 	console.log("doStyleTransfer called");
-	
+	// load fast style transfer model only per page load
+	if (!fastStyleTransferModel) {
+		fastStyleTransferModel = await loadModel();
+	}
 	// get image to apply style to
 	const image = document.getElementById("image");
 	const styleImage = document.getElementById("styleImage");
 	
-	console.log("model=" + model);
-	//model.execute();
+	console.log("model=" + fastStyleTransferModel);
+	
 	const imageTensor = preprocess(image);
 	const styleImageTensor = preprocess(styleImage);
 	
-    let result = model.execute([styleImageTensor,imageTensor]);
+    let result = fastStyleTransferModel.execute([styleImageTensor,imageTensor]);
 	let canvas = document.getElementById("stylizedImage");
 	
 	tf.browser.toPixels( tf.squeeze(result), canvas);
