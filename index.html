@@ -2,7 +2,7 @@
 
 <html>
 
-<body onload="initStyleTransfer();">
+<body>
 
 <label for="avatar">Choose an image to apply styles to:</label>
 <p/>
@@ -35,7 +35,7 @@
 
 
 <script>
-
+window.addEventListener('load', initStyleTransfer());
 
 let changeImage = function (evt) {
     var tgt = evt.target || window.event.srcElement,
