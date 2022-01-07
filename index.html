@@ -2,7 +2,7 @@
 
 <html>
 
-<body onload="doStyleTransfer()">
+<body onload="initStyleTransfer();">
 
 <label for="avatar">Choose an image to apply styles to:</label>
 <p/>
@@ -12,7 +12,7 @@
        accept="image/png, image/jpeg" imgid="image" >   
 <p/>
 	   	   
-<img id="image" src="/image.jpeg" width="500"/>
+<canvas id="image" url="/image.jpeg" width="348" height="348"/>
 <p/>
 
 <label for="avatar">Choose the style image:</label>
@@ -23,9 +23,13 @@
        accept="image/png, image/jpeg" imgid="styleImage" >
 	
 <p/>	
-<img id="styleImage" src="/style_transfer_image.jpeg" width="500"/>
+<canvas id="styleImage"  url="/style_transfer_image.jpeg"  width="256" height="256"/>
+
+<p/>
+<button type="button" name="doStyleTransfer" onclick="doStyleTransfer()">Apply Style Transfer</button>
 <p/>
 <canvas id="stylizedImage" width="500" height="500"/>
+
 </body>
 </html>
 
@@ -41,11 +45,13 @@ let changeImage = function (evt) {
     if (FileReader && files && files.length) {
         var fr = new FileReader();
         fr.onload = function () {
-            document.getElementById(evt.target.getAttribute("imgid")).src = fr.result;
+			let targetCanvas = document.getElementById(evt.target.getAttribute("imgid"));
+			resizeAndSquareImage(fr.result, targetCanvas);
+         
         }
         fr.readAsDataURL(files[0]);
 		
-		doStyleTransfer();
+		//=doStyleTransfer();
     }
 
     // Not supported
@@ -58,6 +64,17 @@ var fastStyleTransferModel;
 
 document.getElementById("changeImage").onchange = changeImage;
 document.getElementById("changeStyleImage").onchange = changeImage;
+
+async function initStyleTransfer() {
+	let imageCanvas = document.getElementById("image");
+	let styleImageCanvas = document.getElementById("styleImage");
+	
+	let imageUrl = imageCanvas.getAttribute("url");
+	let imageStyleUrl = styleImageCanvas.getAttribute("url");
+	await resizeAndSquareImage(imageUrl, imageCanvas);
+	await resizeAndSquareImage(imageStyleUrl, styleImageCanvas);
+
+}
 
 async function loadModel() {
 	return tf.loadGraphModel('/style_transfer_tfjs/model.json');
@@ -75,9 +92,11 @@ async function doStyleTransfer() {
 	
 	console.log("model=" + fastStyleTransferModel);
 	
-	const imageTensor = preprocess(image);
-	const styleImageTensor = preprocess(styleImage);
-	
+	let imageTensor = preprocess(image);
+	let styleImageTensor = preprocess(styleImage);
+	imageTensor = tf.pool(imageTensor, 3, 'avg', 'same', [1, 1], 1);
+	styleImageTensor = tf.pool(styleImageTensor, 3, 'avg', 'same', [1, 1], 1);
+		
     let result = fastStyleTransferModel.execute([styleImageTensor,imageTensor]);
 	let canvas = document.getElementById("stylizedImage");
 	
@@ -87,10 +106,38 @@ async function doStyleTransfer() {
 function preprocess(imageData) {
 	let imageTensor = tf.browser.fromPixels(imageData);
     const offset = tf.scalar(255.0);
-	const normalized = tf.scalar(1.0).sub(imageTensor.div(offset));
+	const normalized = imageTensor.div(offset);
 	const batched = normalized.expandDims(0);
+	batched.print();
+	console.log("dtype=" + batched.dtype);
 	return batched;
 
+}
+
+
+function resizeAndSquareImage(imageUrl, targetCanvas) {
+	// the desired aspect ratio of our output image (width / height)
+	const outputImageAspectRatio = 1;
+
+	// this image will hold our source image data
+	const inputImage = new Image();
+	console.log("resizeAndSquareImage called");
+	// we want to wait for our image to load
+	let result = inputImage.onload = () => {
+		const imgSize = Math.min(inputImage.width, inputImage.height);
+	    // The following two lines yield a central based cropping.
+        // They can both be amended to be 0, if you wish it to be
+        // a left based cropped image.
+    	const left = (inputImage.width - imgSize) / 2;
+    	const top = (inputImage.height - imgSize) / 2;
+        //var left = 0; // If you wish left based cropping instead.
+        //var top = 0; // If you wish left based cropping instead.
+    	const ctx = targetCanvas.getContext("2d");
+		ctx.drawImage(inputImage, left, top, imgSize, imgSize, 0, 0, targetCanvas.width, targetCanvas.height);
+	  return targetCanvas;
+	};
+	inputImage.src = imageUrl;
+	return result;
 }
 
 
