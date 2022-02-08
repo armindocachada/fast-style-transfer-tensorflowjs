@@ -1,0 +1,12 @@
+{
+  "extends": "next/core-web-vitals",
+  
+  "compilerOptions": {
+    "strict": false,
+    "strictPropertyInitialization": false,
+    "strictNullChecks": false
+  }
+
+}
+
+
