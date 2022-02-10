@@ -18,38 +18,14 @@ const useStyles = makeStyles({
         color: 'white',
         height: 48,
     },
-    container: {
 
-        backgroundColor: "red"
-    },
-    card: {
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column'
-    },
-    cardGrid: {
-        alignItems: "center",
-        justifyContent: "center"
-    },
+
     cardMedia: {
     },
-    canvasCamera: {
-        aspectRatio: "16 / 9",
-        width: "100%",
-    },
-    canvasImage: {
-        width: "100%",
-    },
-    progressBar: {
-        display: "flex",
-        justifyContent: "center"
-    },
-    modalTitle: {
-        textAlign: "center"
-    },
-    actionButton: {
-        padding: "10px"
-    },
+
+
+
+
 
 });
 
@@ -121,9 +97,10 @@ const ImageSelector = ({ listKey, list, uploadImageLabel, setStateCallback }:Pro
                 image={image}
                 title="Style Image"
                 component="img" onLoad={notifyImageLoaded}
+                key="selectorImage"
             />
-            <Grid container rowSpacing={1} alignItems="flex-start" justifyContent="space-evenly" p={2}>
-                <Grid item xs={12} md={6} >
+            <Grid container rowSpacing={1} alignItems="flex-start" justifyContent="space-evenly" p={2} key="selector">
+                <Grid item xs={12} md={6} key="uploadMedia">
                     <label htmlFor={listKey + "-upload-image"}>
                         <input
                             style={{ display: 'none' }}
@@ -137,9 +114,10 @@ const ImageSelector = ({ listKey, list, uploadImageLabel, setStateCallback }:Pro
                         </Button>
                     </label>
                 </Grid>
-                <Grid item xs={12} md={6} >
+                <Grid item xs={12} md={6} key="imageList">
                         <NativeSelect
                             defaultValue={image}
+                            key="random1"
                             inputProps={{
                                 name: 'image',
                                 id: listKey
@@ -147,19 +125,13 @@ const ImageSelector = ({ listKey, list, uploadImageLabel, setStateCallback }:Pro
                             {
                                 list.map((image, index) => {
                                     return (
-                                        <>
-                                            <option value={image.url}>{image.name}</option>
-                                        </>
+                                        <option key={"imageOption" + index} value={image.url}>{image.name}</option>
                                     )
                                   })
                             }
-                            
-                           
-                            
-                          
-                          
+
                         </NativeSelect>
-                    </Grid>
+                </Grid>
             </Grid>
 
         </>

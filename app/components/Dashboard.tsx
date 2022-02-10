@@ -1,33 +1,16 @@
-import styles from './camera.module.css'
 import FastStyleTransferModel from './FastStyleTransferModel'
+import AdditionalInfo from './AdditionalInfo'
 import ImageSelector from './ImageSelector'
 import CameraDisplay from './CameraDisplay';
 import PhotoDisplay from './PhotoDisplay';
 
 import React, { useEffect, useState } from "react";
-import * as tf from "@tensorflow/tfjs";
-import { Tensor3D, Tensor4D, } from '@tensorflow/tfjs';
-import CircularProgress from '@mui/material/CircularProgress';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import { Button, Stack, Card, CardMedia, CardActions, Container, Grid, NativeSelect, InputLabel, FormControl, FormControlLabel } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import Image from 'next/image';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
 
-// declaration of global variables
-var video: HTMLVideoElement;
-var canvas1: HTMLCanvasElement;
-var canvasCtx1: CanvasRenderingContext2D | null;
-var canvas2: HTMLCanvasElement;
-var canvasCtx2: CanvasRenderingContext2D | null;
-var fastStyleTransferModel: tf.GraphModel;
-
-
-
-function resizeImage(imageURL: string, targetCanvas: HTMLCanvasElement) {
+/*function resizeImage(imageURL: string, targetCanvas: HTMLCanvasElement) {
     console.log("Target Canvas=" + targetCanvas);
     const inputImage = document.createElement("img");
     console.log("resizeImage called");
@@ -57,31 +40,7 @@ function resizeImage(imageURL: string, targetCanvas: HTMLCanvasElement) {
     };
     inputImage.src = imageURL;
     return result;
-}
-
-
-function preprocess(imageData: (tf.PixelData | ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement), size?: number) {
-    let imageTensor = tf.browser.fromPixels(imageData);
-    const offset = tf.scalar(255.0);
-    const normalized = imageTensor.div(offset);
-    const batched = normalized.expandDims(0) as Tensor4D;
-    let result = batched;
-    if (size) {
-        const imgSize = Math.min(imageData.width, imageData.height);
-        //console.log("Image Size:" + imgSize);
-        const left = (imageData.width - imgSize) / 2;
-        const top = (imageData.height - imgSize) / 2;
-        const right = (imageData.width + imgSize) / 2;
-        const bottom = (imageData.height + imgSize) / 2;
-        let boxes = [[top / imageData.height, left / imageData.width, bottom / imageData.height, right / imageData.width]];
-        result = tf.image.cropAndResize(batched, boxes, [0], [size,size])
-    }
-
-
-    return result;
-
-
-}
+}*/
 
 const useStyles = makeStyles({
     root: {
@@ -92,10 +51,7 @@ const useStyles = makeStyles({
         color: 'white',
         height: 48,
     },
-    container: {
-
-        backgroundColor: "red"
-    },
+ 
     card: {
         height: '100%',
         display: 'flex',
@@ -105,25 +61,9 @@ const useStyles = makeStyles({
         alignItems: "center",
         justifyContent: "center"
     },
-    cardMedia: {
-    },
-    canvasCamera: {
-        aspectRatio: "16 / 9",
-        width: "100%",
-    },
-    canvasImage: {
-        width: "100%",
-    },
-    progressBar: {
-        display: "flex",
-        justifyContent: "center"
-    },
-    modalTitle: {
-        textAlign: "center"
-    },
-    actionButton: {
-        padding: "10px"
-    },
+   
+   
+
     
 });
 
@@ -133,7 +73,7 @@ export enum CameraState {
     stop,
     stopped
 }
-export default function Camera({ }) {
+export default function Dashboard({ }) {
     
     enum Mode {
         video,
@@ -145,49 +85,7 @@ export default function Camera({ }) {
             mode: "camera",
             styleImage: "/images/The_Great_Wave_off_Kanagawa.jpg",
             imageToStyle: "/images/images-to-style-examples/turtle.jpg",
-            //imageToStyle: null
         });
-
-    
-
-
-    const uploadImageToStyle = (evt: React.ChangeEvent<{ name?: string; value: unknown }>) => {
-        let tgt = evt.target as HTMLInputElement,
-            files = tgt.files;
-
-        // FileReader support
-        if (FileReader && files && files.length) {
-            var fr = new FileReader();
-            fr.onload = function () {
-                //state.imageToStyle = fr.result as string;
-
-                /*canvas1 = document.querySelector("#canvasContainer1") as HTMLCanvasElement;
-                canvas2 = document.querySelector("#canvasContainer2") as HTMLCanvasElement;
-                // remove aspect ration constraint - TODO: add different CSS based on state
-                canvas1.className = "";
-                canvas2.className = "";
-                canvas2.width = canvas1.width;
-                canvas2.height = canvas1.height;
-                canvasCtx1 = canvas1.getContext("2d");
-                let targetCanvas = canvas1;
-
-
-                resizeImage(fr.result, canvas1);*/
-                
-                //console.log("Triggering change event");
-                //let styleImagesList = document.getElementById("styleImagesList") as HTMLSelectElement;
-                //styleImagesList.dispatchEvent(new Event('change', { bubbles: true }));
-                setState({
-                    ...state,
-                    "imageToStyle": fr.result as string,
-                });
-            }
-            fr.readAsDataURL(files[0]);
-
-
-        }
-
-    }
 
     const startCamera = () => {
         setState({
@@ -205,22 +103,6 @@ export default function Camera({ }) {
 
     }
    
-
-    const takePhoto = (evt: React.MouseEvent<{ name?: string; value: unknown }>) => {
-
-        /*let dataURL: string = canvas2.toDataURL('image/png');
-
-        var downloadLink = document.createElement('a');
-        downloadLink.href = dataURL;
-        downloadLink.download = 'myImage.png';
-
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        */
-        doStyleTransfer(canvas1);
-    }
-
     const updateCameraStateCallback = (cameraState: CameraState) => {
         setState({
             ...state,
@@ -243,27 +125,7 @@ export default function Camera({ }) {
         });
     }
 
-    const doStyleTransfer = (image: ImageData, styleImage:HTMLImageElement, canvasDest: HTMLCanvasElement) => {
-       
-        // get image to apply style to
-        //const image = document.getElementById("image");
-        //const styleImage = document.getElementById("styleImage") as HTMLImageElement;
-
-        tf.tidy(() => {
-            const imageTensor = preprocess(image);
-
-            const styleImageTensor = preprocess(styleImage, 256);
-            //const styleImageTensor = state.styleImage;
-            //console.log("Calling model");
-            if (fastStyleTransferModel) {
-                let result = fastStyleTransferModel.execute([styleImageTensor, imageTensor]);
-                //console.log(result);
-                tf.browser.toPixels(tf.squeeze(result as Tensor4D) as Tensor3D, canvasDest);
-            }
-        });
-    }
-
-    const setModeTo = (event) => {
+    const setModeTo = (event: React.ChangeEvent<HTMLInputElement>, value: string) => {
         setState({
             ...state,
             mode: event.target.value,
@@ -289,7 +151,7 @@ export default function Camera({ }) {
     ];
 
     const predefinedImagesToStyle = [
-        { url: "/images/images-to-style-examples/turtle.jpg", name: "turtle.jpg" },
+        { url: "/images/turtle.jpg", name: "turtle.jpg" },
         
     ];
     const classes = useStyles();
@@ -297,11 +159,10 @@ export default function Camera({ }) {
     return (
         <>
             <FastStyleTransferModel>
-                {model => {
-                  fastStyleTransferModel = model;
+                {doStyleTransfer => {
                    
-                  return  <Container className={classes.cardGrid} >
-                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 12, sm: 12, md: 12 }}>
+                  return  <Container className={classes.cardGrid} key="container">
+                        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 12, sm: 12, md: 12 }} key="dasboard">
                             <Grid item xs={12} sm={4} md={4} >
                                 <Card className={classes.card}>
 
@@ -323,17 +184,13 @@ export default function Camera({ }) {
                                           </RadioGroup>
                                         </Grid>
                                        
-                                        <Grid item xs={12} md={6}>
-                                            <label>
-                                                <Button variant="outlined" onClick={takePhoto}>
-                                                    Take Photo
-                                                </Button>
-                                            </label>
-                                        </Grid>
+ 
+
+
                                      
                                       {
                                         state.mode == "camera" &&
-                                          <Grid item xs={12} md={6} >
+                                          <Grid item xs={12} md={6}>
                                               {state.camera != CameraState.start && state.camera != CameraState.started &&
                                                   <Button variant="outlined" onClick={startCamera} >
                                                       Start Camera
@@ -346,30 +203,15 @@ export default function Camera({ }) {
                                               }
                                           </Grid>
                                       }
-                                      {
-                                        state.mode == "photo" &&
-                                          <Grid item xs={12} md={6}>
-                                              <label htmlFor="upload-photo">
-                                                  <input
-                                                      style={{ display: 'none' }}
-                                                      id="upload-photo"
-                                                      name="upload-photo"
-                                                      type="file" onChange={uploadImageToStyle}
-                                                  />
-
-                                                  <Button variant="outlined" component="span">
-                                                      Upload Image
-                                                  </Button>
-                                              </label>
-                                          </Grid>
-                                      }
+                                     
+                                      <AdditionalInfo/>          
 
                                     </Grid>
 
 
                                 </Card>
                             </Grid>
-                            <Grid item xs={12} sm={6} md={8}>
+                            <Grid item xs={12} sm={6} md={8} >
                               {
                                   state.mode == "camera" &&
                                   <CameraDisplay styleImageUrl={state.styleImage} updateCameraStateCallback={updateCameraStateCallback} cameraState={state.camera} doStyleTransferCallback={doStyleTransfer} />

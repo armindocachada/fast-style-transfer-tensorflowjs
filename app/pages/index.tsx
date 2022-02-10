@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Layout, { siteTitle } from '../components/layout'
-import Camera from '../components/Camera'
+import Dashboard from '../components/Dashboard'
 
 export default function Home({
     allPostsData
@@ -17,7 +17,7 @@ export default function Home({
             <Head>
                 <title>{siteTitle}</title>
             </Head>
-            <Camera/>
+            <Dashboard/>
         </Layout>
     )
     

@@ -24,6 +24,25 @@ function loadModel() {
     return tf.loadGraphModel('/style_transfer_tfjs/model.json');
 }
 
+function preprocess(imageData: (tf.PixelData | ImageData | HTMLImageElement | HTMLCanvasElement | HTMLVideoElement), size?: number) {
+    let imageTensor = tf.browser.fromPixels(imageData);
+    const offset = tf.scalar(255.0);
+    const normalized = imageTensor.div(offset);
+    const batched = normalized.expandDims(0) as Tensor4D;
+    let result = batched;
+    if (size) {
+        const imgSize = Math.min(imageData.width, imageData.height);
+        //console.log("Image Size:" + imgSize);
+        const left = (imageData.width - imgSize) / 2;
+        const top = (imageData.height - imgSize) / 2;
+        const right = (imageData.width + imgSize) / 2;
+        const bottom = (imageData.height + imgSize) / 2;
+        let boxes = [[top / imageData.height, left / imageData.width, bottom / imageData.height, right / imageData.width]];
+        result = tf.image.cropAndResize(batched, boxes, [0], [size,size])
+    }
+    return result;
+}
+
 function LoadingModel() {
     const classes = useStyles();
     return (
@@ -56,13 +75,33 @@ function LoadingModel() {
 }
 
 type Props = {
-    children: (model: tf.GraphModel) => ReactNode;
+    children: (doStyleTransferCallback: (image: HTMLImageElement|ImageData, styleImage:HTMLImageElement, canvasDest: HTMLCanvasElement) => void ) => ReactNode;
 };
 
 
 const FastStyleTransferModel = ({children}:Props) => {
     const [model, setModel] = useState(null as tf.GraphModel | null)
 
+    const doStyleTransferCallback = (image: HTMLImageElement|ImageData, styleImage:HTMLImageElement, canvasDest: HTMLCanvasElement) => {
+       
+        // get image to apply style to
+        //const image = document.getElementById("image");
+        //const styleImage = document.getElementById("styleImage") as HTMLImageElement;
+    
+        tf.tidy(() => {
+            const imageTensor = preprocess(image);
+    
+            const styleImageTensor = preprocess(styleImage, 256);
+            //const styleImageTensor = state.styleImage;
+            //console.log("Calling model");
+            if (model) {
+                let result = model.execute([styleImageTensor, imageTensor]);
+                //console.log(result);
+                tf.browser.toPixels(tf.squeeze(result as Tensor4D) as Tensor3D, canvasDest);
+            }
+        });
+    }
+    
     useEffect(() => {
         console.log("Loading model!");
         loadModel().then((loadedModel: tf.GraphModel) => {
@@ -79,7 +118,7 @@ const FastStyleTransferModel = ({children}:Props) => {
             }
 
             {model &&
-                [ children(model) ]
+                [ children(doStyleTransferCallback) ]
             }
         </>
     )

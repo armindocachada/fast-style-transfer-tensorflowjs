@@ -1,36 +1,20 @@
 import React, { useEffect, useState, ReactNode } from "react";
-import * as tf from "@tensorflow/tfjs";
-import { Tensor3D, Tensor4D, } from '@tensorflow/tfjs';
 import { makeStyles } from '@mui/styles';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import { CameraState } from './Camera';
-import CircularProgress from '@mui/material/CircularProgress';
+import { CameraState } from './Dashboard';
+
 import { Button, Stack, Card, CardMedia, CardActions, Container, Grid, NativeSelect, InputLabel, FormControl } from '@mui/material';
+import { loadImage } from '../modules/utils';
 
 type Props = {
     styleImageUrl: string;
     updateCameraStateCallback: (cameraState: CameraState) => void;
     cameraState: CameraState,
-    doStyleTransferCallback: (styleImage:HTMLImageElement, image: ImageData, canvasDest: HTMLCanvasElement) => void;
+    doStyleTransferCallback: (styleImage:HTMLImageElement|ImageData, image: HTMLImageElement|ImageData, canvasDest: HTMLCanvasElement) => void;
 };
 let video: HTMLVideoElement;
-
-const loadImage = (url) => new Promise((resolve, reject) => {
-    const img = new Image();
-    img.addEventListener('load', () => resolve(img));
-    img.addEventListener('error', (err) => reject(err));
-    img.src = url;
-});
-
+let styleImage: HTMLImageElement;
 
 const CameraDisplay = ({ styleImageUrl, updateCameraStateCallback, cameraState, doStyleTransferCallback }: Props) => {
-    //const [styleImage, setStyleImage] = useState('/images/The_Great_Wave_off_Kanagawa.jpg' as string)
-
-
-    let styleImage: HTMLImageElement;
-
-
     const computeFrame = () => {
 
         let canvas1 = document.querySelector("#canvasContainer1") as HTMLCanvasElement;
@@ -101,11 +85,7 @@ const CameraDisplay = ({ styleImageUrl, updateCameraStateCallback, cameraState, 
         }
 
     }
-
-
-
-
-
+    
     const useStyles = makeStyles({
        
         card: {
@@ -150,12 +130,12 @@ const CameraDisplay = ({ styleImageUrl, updateCameraStateCallback, cameraState, 
     return (
         <>
             <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 12, sm: 12, md: 12 }}>
-                <Grid item xs={12} sm={12} md={12}>
+                <Grid key="canvasContainer1" item xs={12} sm={12} md={12}>
                     <Card className={classes.card}>
                         <canvas id="canvasContainer1" className={classes.canvasCamera} />
                     </Card>
                 </Grid>
-                <Grid item xs={12} sm={12} md={12}>
+                <Grid key="canvasContainer2" item xs={12} sm={12} md={12}>
                     <Card className={classes.card}>
                         <canvas id="canvasContainer2" className={classes.canvasCamera} />
                     </Card>
