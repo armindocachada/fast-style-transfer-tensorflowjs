@@ -9,7 +9,9 @@ type Props = {
     styleImageUrl: string;
     updateCameraStateCallback: (cameraState: CameraState) => void;
     cameraState: CameraState,
-    doStyleTransferCallback: (styleImage:HTMLImageElement|ImageData, image: HTMLImageElement|ImageData, canvasDest: HTMLCanvasElement) => void;
+    doStyleTransferCallback: (imageToStyle: ImageData, styleImage: HTMLImageElement, canvasDest: HTMLCanvasElement) => void;
+
+
 };
 let video: HTMLVideoElement;
 let styleImage: HTMLImageElement;

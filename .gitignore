@@ -39,3 +39,5 @@ yarn-error.log*
 # visual studio
 .vs/
 .next/
+
+out/
