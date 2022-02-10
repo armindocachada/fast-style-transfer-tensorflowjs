@@ -4,13 +4,7 @@ import Layout, { siteTitle } from '../components/layout'
 import Dashboard from '../components/Dashboard'
 
 export default function Home({
-    allPostsData
-}: {
-    allPostsData: {
-        date: string
-        title: string
-        id: string
-    }[]
+    
 }) {
     return (
         <Layout home>
