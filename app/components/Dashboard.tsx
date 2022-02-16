@@ -84,7 +84,7 @@ export default function Dashboard({ }) {
             camera: CameraState.stopped,
             mode: "camera",
             styleImage: "/images/The_Great_Wave_off_Kanagawa.jpg",
-            imageToStyle: "/images/images-to-style-examples/turtle.jpg",
+            imageToStyle: "/images/turtle.jpg",
         });
 
     const startCamera = () => {
