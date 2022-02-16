@@ -67,17 +67,23 @@ const CameraDisplay = ({ styleImageUrl, updateCameraStateCallback, cameraState, 
         video = document.createElement("video") as HTMLVideoElement;
         video.autoplay = true;
         video.onplay = timerCallback;
-        video.width = canvas1.width;
-        video.height = canvas1.height;
+        //video.width = canvas1.width;
+        //video.height = canvas1.height;
 
-        console.log("video width: " + video.width);
-        console.log("video height: " + video.height);
+
 
         if (navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: { width: 480, height: 270 } })
+            navigator.mediaDevices.getUserMedia({ video: { width: 480, height: 270} })
                 .then(function (stream) {
+
                     console.log("Setting stream");
                     video.srcObject = stream;
+                    canvas1.width = stream.getVideoTracks()[0].getSettings().width;
+                    canvas1.height = stream.getVideoTracks()[0].getSettings().height;
+                    canvas2.width = canvas1.width;
+                    canvas2.height = canvas1.height;
+                    console.log("canvas1 width: " + video.width);
+                    console.log("canvas2 height: " + video.height);
                     updateCameraStateCallback(CameraState.started);
                     return video;
                 })
@@ -97,7 +103,7 @@ const CameraDisplay = ({ styleImageUrl, updateCameraStateCallback, cameraState, 
         },
 
         canvasCamera: {
-            aspectRatio: "16 / 9",
+            //aspectRatio: "4 / 3",
             width: "100%",
         },
         
