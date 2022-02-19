@@ -10,9 +10,8 @@ type Props = {
     updateCameraStateCallback: (cameraState: CameraState) => void;
     cameraState: CameraState,
     doStyleTransferCallback: (imageToStyle: ImageData, styleImage: HTMLImageElement, canvasDest: HTMLCanvasElement) => void;
-
-
 };
+
 let video: HTMLVideoElement;
 let styleImage: HTMLImageElement;
 
@@ -78,12 +77,16 @@ const CameraDisplay = ({ styleImageUrl, updateCameraStateCallback, cameraState, 
 
                     console.log("Setting stream");
                     video.srcObject = stream;
-                    canvas1.width = stream.getVideoTracks()[0].getSettings().width;
-                    canvas1.height = stream.getVideoTracks()[0].getSettings().height;
-                    canvas2.width = canvas1.width;
-                    canvas2.height = canvas1.height;
-                    console.log("canvas1 width: " + video.width);
-                    console.log("canvas2 height: " + video.height);
+                    let streamWidth = stream.getVideoTracks()[0].getSettings().width;
+                    let streamHeight = stream.getVideoTracks()[0].getSettings().height;
+                    if (streamWidth) {
+                        canvas1.width = streamWidth;
+                        canvas2.width = canvas1.width;
+                    }
+                    if (streamHeight) {
+                        canvas1.height = streamHeight;
+                        canvas2.height = canvas1.height;
+                    }
                     updateCameraStateCallback(CameraState.started);
                     return video;
                 })

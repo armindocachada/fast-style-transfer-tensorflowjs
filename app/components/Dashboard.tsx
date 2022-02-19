@@ -1,5 +1,7 @@
 import FastStyleTransferModel from './FastStyleTransferModel'
 import AdditionalInfo from './AdditionalInfo'
+import ModeSelector from './ModeSelector'
+
 import ImageSelector from './ImageSelector'
 import CameraDisplay from './CameraDisplay';
 import PhotoDisplay from './PhotoDisplay';
@@ -125,7 +127,7 @@ export default function Dashboard({ }) {
         });
     }
 
-    const setModeTo = (event: React.ChangeEvent<HTMLInputElement>, value: string) => {
+    const setModeToCallback = (event: React.ChangeEvent<HTMLInputElement>, value: string) => {
         setState({
             ...state,
             mode: event.target.value,
@@ -173,19 +175,9 @@ export default function Dashboard({ }) {
                                   }
 
                                   <Grid container rowSpacing={1} alignItems="flex-start" justifyContent="space-evenly" p={2}>
-                                        <Grid item xs={12} md={12} >
-                                          <RadioGroup
-                                              row
-                                              aria-labelledby="demo-row-radio-buttons-group-label"
-                                              name="row-radio-buttons-group" defaultValue="camera" onChange={setModeTo}>
-                                              <FormControlLabel value="camera" control={<Radio />} label="Video"/>
-                                              <FormControlLabel value="photo" control={<Radio />} label="Photos"  />
-                                             
-                                          </RadioGroup>
-                                        </Grid>
-                                       
- 
-
+                                      <Grid item xs={12} md={12} >
+                                        <ModeSelector mode={state.mode} setModeToCallback={setModeToCallback} />
+                                      </Grid>
 
                                      
                                       {
